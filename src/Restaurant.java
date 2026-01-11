@@ -14,22 +14,22 @@ public class Restaurant {
     public ArrayList<PizzaSauce> sauces;
     int maxToppings = 10;
     public Restaurant() {
-        pizzas = new ArrayList<Pizza>();
-        scheduledPizzas = new ArrayList<Joint<Pizza, Integer>>();
-        toppingsNonVeg = new ArrayList<Topping>();
-        toppingsVeg = new ArrayList<Topping>();
-        sizes = new ArrayList<PizzaSize>();
-        crusts = new ArrayList<CrustType>();
-        sauces = new ArrayList<PizzaSauce>();
+        pizzas = new ArrayList<>();
+        scheduledPizzas = new ArrayList<>();
+        toppingsNonVeg = new ArrayList<>();
+        toppingsVeg = new ArrayList<>();
+        sizes = new ArrayList<>();
+        crusts = new ArrayList<>();
+        sauces = new ArrayList<>();
     }
     public Restaurant(ArrayList<Topping> nonVeg, ArrayList<Topping> veg) {
-        pizzas = new ArrayList<Pizza>();
-        scheduledPizzas = new ArrayList<Joint<Pizza, Integer>>();
+        pizzas = new ArrayList<>();
+        scheduledPizzas = new ArrayList<>();
         toppingsNonVeg = nonVeg;
         toppingsVeg = veg;
-        sizes = new ArrayList<PizzaSize>();
-        crusts = new ArrayList<CrustType>();
-        sauces = new ArrayList<PizzaSauce>();
+        sizes = new ArrayList<>();
+        crusts = new ArrayList<>();
+        sauces = new ArrayList<>();
     }
     public static Restaurant makeRestaurant() {
         Restaurant newRestaurant = new Restaurant();
