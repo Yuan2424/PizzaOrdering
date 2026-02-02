@@ -5,4 +5,7 @@ public class Joint<T1, T2> {
         object1 = a;
         object2 = b;
     }
+    public Joint<T1, T2> cloneJoint() {
+        return new Joint<T1, T2>(this.object1, this.object2);
+    }
 }

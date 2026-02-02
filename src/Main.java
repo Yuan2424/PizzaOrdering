@@ -14,12 +14,11 @@ public class Main {
         restaurantOne.saucesList(new ArrayList<PizzaSauce>(Arrays.asList(new PizzaSauce("Tomato", 2), new PizzaSauce("Barbeque", 2))));
         Simulator sim = new Simulator(restaurantOne);
         sim.simulateDay();
-        Scanner scan = new Scanner(System.in);
-        restaurantOne.pizzas.add(restaurantOne.makePizza(scan));
-        restaurantOne.printPizza(restaurantOne.pizzas.get(0));
+//        Scanner scan = new Scanner(System.in);
+//        restaurantOne.pizzas.add(restaurantOne.makePizza(scan));
+//        restaurantOne.printPizza(restaurantOne.pizzas.get(0));
 
-        Scanner scan2 = new Scanner(System.in);
-        restaurantOne.schedulePizzaUI(scan2, 540);
-        System.out.println(restaurantOne.advanceQueue(520));
+//        Scanner scan2 = new Scanner(System.in);
+//        restaurantOne.schedulePizzaUI(scan2, 540);
     }
 }

@@ -1,3 +1,6 @@
+import com.oracle.jrockit.jfr.InvalidValueException;
+import org.omg.CORBA.DynAnyPackage.InvalidValue;
+
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -7,15 +10,21 @@ public class Restaurant {
     // Variables: pizzas, toppings (vegetarian and non-vegetarian)
     public ArrayList<Pizza> pizzas;
     public ArrayList<Joint<Pizza, Integer>> scheduledPizzas;
+    public ArrayList<Pizza> unloadedPizzas;
+    public ArrayList<Oven> ovens;
     public ArrayList<Topping> toppingsNonVeg;
     public ArrayList<Topping> toppingsVeg;
     public ArrayList<PizzaSize> sizes;
     public ArrayList<CrustType> crusts;
     public ArrayList<PizzaSauce> sauces;
     int maxToppings = 10;
+    int lastPassedTime = -1;
+    int numUnloadPizzas = 0;
     public Restaurant() {
         pizzas = new ArrayList<>();
         scheduledPizzas = new ArrayList<>();
+        unloadedPizzas = new ArrayList<>();
+        ovens = new ArrayList<>();
         toppingsNonVeg = new ArrayList<>();
         toppingsVeg = new ArrayList<>();
         sizes = new ArrayList<>();
@@ -25,6 +34,8 @@ public class Restaurant {
     public Restaurant(ArrayList<Topping> nonVeg, ArrayList<Topping> veg) {
         pizzas = new ArrayList<>();
         scheduledPizzas = new ArrayList<>();
+        unloadedPizzas = new ArrayList<>();
+        ovens = new ArrayList<>();
         toppingsNonVeg = nonVeg;
         toppingsVeg = veg;
         sizes = new ArrayList<>();
@@ -35,6 +46,9 @@ public class Restaurant {
         Restaurant newRestaurant = new Restaurant();
         //newRestaurant.toppingsNonVeg =
         return newRestaurant;
+    }
+    public void addOven(Oven oven) {
+        this.ovens.add(oven);
     }
     public void sizesList(ArrayList<PizzaSize> sizes) {
         this.sizes = sizes;
@@ -153,31 +167,68 @@ public class Restaurant {
     }
 
     // advanceQueue should take in a time and choose a pizza to cook. The pizza will be printed and the new time after cooking is returned.
-    public Integer advanceQueue(Integer currentTime) {
+    // advanceQueue cannot use the same time twice
+    public void advanceQueue(Integer currentTime) throws IllegalArgumentException {
+        if (lastPassedTime >= currentTime) {
+            throw(new IllegalArgumentException());
+        }
+        for (Oven o : ovens) {
+            o.unloadPizzas(currentTime);
+        }
         if (!scheduledPizzas.isEmpty() && !pizzas.isEmpty()) {
-            if (pizzaCookTime(scheduledPizzas.get(0).object1) + currentTime >= scheduledPizzas.get(0).object2) {
-                printPizza(scheduledPizzas.get(0).object1);
-                Pizza tempPizza = scheduledPizzas.remove(0).object1;
-                return currentTime + pizzaCookTime(tempPizza);
+            // If the scheduled pizza must be cooked now
+            int cookTime = pizzaCookTime(scheduledPizzas.get(0).object1);
+            int scheduledTime = scheduledPizzas.get(0).object2;
+            if (cookTime + currentTime >= scheduledTime) {
+                Joint<Pizza, Integer> timedPizza = scheduledPizzas.get(0).cloneJoint();
+                timedPizza.object2 = currentTime;
+                loadStatus status = attemptLoad(timedPizza);
+                if (status == loadStatus.successful) {
+                    scheduledPizzas.remove(0);
+                    numUnloadPizzas++;
+                }
+                // If status returns as unsuccessful, it will simply be re-checked in the next iteration
             } else {
-                printPizza(pizzas.get(0));
-                Pizza tempPizza = pizzas.remove(0);
-                return currentTime + pizzaCookTime(tempPizza);
+                Joint<Pizza, Integer> pizza = new Joint<Pizza, Integer>(pizzas.get(0), currentTime);
+                loadStatus status = attemptLoad(pizza);
+                if (status == loadStatus.successful) {
+                    pizzas.remove(0);
+                    numUnloadPizzas++;
+                }
             }
         }
         else if (!scheduledPizzas.isEmpty()) {
             if (pizzaCookTime(scheduledPizzas.get(0).object1) + currentTime >= scheduledPizzas.get(0).object2) {
-                printPizza(scheduledPizzas.get(0).object1);
-                Pizza tempPizza = scheduledPizzas.remove(0).object1;
-                return currentTime + pizzaCookTime(tempPizza);
+                Joint<Pizza, Integer> timedPizza = scheduledPizzas.get(0).cloneJoint();
+                timedPizza.object2 = currentTime;
+                loadStatus status = attemptLoad(timedPizza);
+                if (status == loadStatus.successful) {
+                    scheduledPizzas.remove(0);
+                    numUnloadPizzas++;
+                }
             }
         }
+        // Load the next ready pizza
         else if (!pizzas.isEmpty()) {
-            printPizza(pizzas.get(0));
-            Pizza tempPizza = pizzas.remove(0);
-            return currentTime + pizzaCookTime(tempPizza);
+            Joint<Pizza, Integer> pizza = new Joint<Pizza, Integer>(pizzas.get(0), currentTime);
+            loadStatus status = attemptLoad(pizza);
+            if (status == loadStatus.successful) {
+                pizzas.remove(0);
+                numUnloadPizzas++;
+            }
         }
-        return currentTime;
+        lastPassedTime = currentTime;
+    }
+    public loadStatus attemptLoad(Joint<Pizza, Integer> pizza) {
+        for (Oven o : ovens) {
+            if (o.loadPizza(pizza) == loadStatus.successful) {
+                return loadStatus.successful;
+            }
+        }
+        return loadStatus.unsuccessful;
+    }
+    public int getNumUnloadPizzas() {
+        return numUnloadPizzas;
     }
     //public void selectPizza()
 }
