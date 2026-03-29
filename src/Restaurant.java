@@ -40,9 +40,7 @@ public class Restaurant {
         sauces = new ArrayList<>();
     }
     public static Restaurant makeRestaurant() {
-        Restaurant newRestaurant = new Restaurant();
-        //newRestaurant.toppingsNonVeg =
-        return newRestaurant;
+        return new Restaurant();
     }
     public void addOven(Oven oven) {
         this.ovens.add(oven);
@@ -89,7 +87,7 @@ public class Restaurant {
     }
     public Pizza makePizza(Scanner scan) {
         boolean toppingsDone = false;
-        ArrayList<Topping> toppings = new ArrayList<Topping>();
+        ArrayList<Topping> toppings = new ArrayList<>();
         Scanner toppingScan = new Scanner(System.in);
         while (!toppingsDone) {
             Topping newTopping = selectTopping(toppingScan);
@@ -104,11 +102,11 @@ public class Restaurant {
         PizzaSauce sauce = selectItem(scan, sauces);
         PizzaSize size = selectItem(scan, sizes);
         Pizza newPizza = new Pizza(size, crust, sauce, toppings);
-        return(newPizza);
+        return newPizza;
         //this.pizzas.add(newPizza);
     }
     public Pizza makePizza(Random rand){
-        ArrayList<Topping> toppings = new ArrayList<Topping>();
+        ArrayList<Topping> toppings = new ArrayList<>();
         int toppingNum = Math.abs(rand.nextInt()) % maxToppings;
         for (int i = 0; i < toppingNum; i++) {
             toppings.add(toppingsNonVeg.get(Math.abs(rand.nextInt()) % toppingsNonVeg.size()));
@@ -159,7 +157,7 @@ public class Restaurant {
     }
 
     public void schedulePizza(Integer time, Pizza pizza) {
-        Joint<Pizza, Integer> scheduled = new Joint<Pizza, Integer>(pizza, time);
+        Joint<Pizza, Integer> scheduled = new Joint<>(pizza, time);
         this.scheduledPizzas.add(scheduled);
     }
 
@@ -195,7 +193,7 @@ public class Restaurant {
         }
         start = 0;
         while (!pizzas.isEmpty() && status == loadStatus.successful) {
-            Joint<Pizza, Integer> pizza = new Joint<Pizza, Integer>(pizzas.get(start), currentTime);
+            Joint<Pizza, Integer> pizza = new Joint<>(pizzas.get(start), currentTime);
             status = attemptLoad(pizza);
             if (status == loadStatus.successful) {
                 pizzas.remove(start);

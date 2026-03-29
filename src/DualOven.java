@@ -18,7 +18,7 @@ public class DualOven implements Oven {
 
     public ArrayList<Pizza> unloadPizzas(int currentTime) {
         ArrayList<Pizza> pizzas = new ArrayList<>();
-        int cookTime = 0;
+        int cookTime;
         if (p1 != null) {
             cookTime = p1.object1.toppings.size() + 10;
             if (p1.object2 + cookTime >= currentTime) {

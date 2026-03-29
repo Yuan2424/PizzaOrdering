@@ -3,8 +3,8 @@ import java.util.ArrayList;
 public class ChainOven implements Oven {
     private final int lowTime;
     private final int highTime;
-    private ArrayList<Joint<Pizza, Integer>> loadedPizzas;
-    private int maxNum;
+    private final ArrayList<Joint<Pizza, Integer>> loadedPizzas;
+    private final int maxNum;
 
     public ChainOven(int lTime, int hTime, int max) {
         lowTime = lTime;

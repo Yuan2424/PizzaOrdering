@@ -15,7 +15,7 @@ public class Simulator {
         restaurant.addOven(new LongOven(5));
         restaurant.addOven(new ChainOven(10, 14, 10));
         while (currentTime < 720) {
-            int n = (int)equation.load(currentTime);
+            int n = equation.load(currentTime);
             loadNPizzas(n);
             if (n > 0) {
                 System.out.print(" ");
