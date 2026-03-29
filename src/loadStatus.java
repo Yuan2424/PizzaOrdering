@@ -1,3 +1,3 @@
 public enum loadStatus {
-    successful, unsuccessful
+    successful, isFull, couldNotLoad
 }

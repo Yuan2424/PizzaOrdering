@@ -13,7 +13,7 @@ public class DualOven implements Oven {
             p2 = pie;
             return loadStatus.successful;
         }
-        return loadStatus.unsuccessful;
+        return loadStatus.isFull;
     }
 
     public ArrayList<Pizza> unloadPizzas(int currentTime) {

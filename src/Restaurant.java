@@ -1,6 +1,3 @@
-import com.oracle.jrockit.jfr.InvalidValueException;
-import org.omg.CORBA.DynAnyPackage.InvalidValue;
-
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -175,57 +172,56 @@ public class Restaurant {
         for (Oven o : ovens) {
             o.unloadPizzas(currentTime);
         }
-        if (!scheduledPizzas.isEmpty() && !pizzas.isEmpty()) {
-            // If the scheduled pizza must be cooked now
-            int cookTime = pizzaCookTime(scheduledPizzas.get(0).object1);
-            int scheduledTime = scheduledPizzas.get(0).object2;
+        loadStatus status = loadStatus.successful;
+        int start = 0;
+        while (!scheduledPizzas.isEmpty() && status == loadStatus.successful) {
+            int cookTime = pizzaCookTime(scheduledPizzas.get(start).object1);
+            int scheduledTime = scheduledPizzas.get(start).object2;
             if (cookTime + currentTime >= scheduledTime) {
-                Joint<Pizza, Integer> timedPizza = scheduledPizzas.get(0).cloneJoint();
+                Joint<Pizza, Integer> timedPizza = scheduledPizzas.get(start).cloneJoint();
                 timedPizza.object2 = currentTime;
-                loadStatus status = attemptLoad(timedPizza);
+                status = attemptLoad(timedPizza);
                 if (status == loadStatus.successful) {
-                    scheduledPizzas.remove(0);
+                    scheduledPizzas.remove(start);
                     numUnloadPizzas++;
                 }
-                // If status returns as unsuccessful, it will simply be re-checked in the next iteration
-            } else {
-                Joint<Pizza, Integer> pizza = new Joint<Pizza, Integer>(pizzas.get(0), currentTime);
-                loadStatus status = attemptLoad(pizza);
-                if (status == loadStatus.successful) {
-                    pizzas.remove(0);
-                    numUnloadPizzas++;
+                else if (status == loadStatus.couldNotLoad) {
+                    start++;
                 }
             }
-        }
-        else if (!scheduledPizzas.isEmpty()) {
-            if (pizzaCookTime(scheduledPizzas.get(0).object1) + currentTime >= scheduledPizzas.get(0).object2) {
-                Joint<Pizza, Integer> timedPizza = scheduledPizzas.get(0).cloneJoint();
-                timedPizza.object2 = currentTime;
-                loadStatus status = attemptLoad(timedPizza);
-                if (status == loadStatus.successful) {
-                    scheduledPizzas.remove(0);
-                    numUnloadPizzas++;
-                }
+            else {
+                break;
             }
         }
-        // Load the next ready pizza
-        else if (!pizzas.isEmpty()) {
-            Joint<Pizza, Integer> pizza = new Joint<Pizza, Integer>(pizzas.get(0), currentTime);
-            loadStatus status = attemptLoad(pizza);
+        start = 0;
+        while (!pizzas.isEmpty() && status == loadStatus.successful) {
+            Joint<Pizza, Integer> pizza = new Joint<Pizza, Integer>(pizzas.get(start), currentTime);
+            status = attemptLoad(pizza);
             if (status == loadStatus.successful) {
-                pizzas.remove(0);
+                pizzas.remove(start);
                 numUnloadPizzas++;
+            }
+            else if (status == loadStatus.couldNotLoad) {
+                start++;
             }
         }
         lastPassedTime = currentTime;
     }
     public loadStatus attemptLoad(Joint<Pizza, Integer> pizza) {
+        int num = 0;
         for (Oven o : ovens) {
-            if (o.loadPizza(pizza) == loadStatus.successful) {
+            loadStatus temp = o.loadPizza(pizza);
+            if (temp == loadStatus.successful) {
                 return loadStatus.successful;
             }
+            else if (temp == loadStatus.couldNotLoad) {
+                num++;
+            }
         }
-        return loadStatus.unsuccessful;
+        if (num > 0) {
+            return loadStatus.couldNotLoad;
+        }
+        return loadStatus.isFull;
     }
     public int getNumUnloadPizzas() {
         return numUnloadPizzas;
